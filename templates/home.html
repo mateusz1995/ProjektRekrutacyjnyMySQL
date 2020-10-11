@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+    <head>
+        <title>Mateusz Nolko</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+        <script data-require="ui-bootstrap@2.2.0" data-semver="2.2.0" src="https://cdn.rawgit.com/angular-ui/bootstrap/gh-pages/ui-bootstrap-tpls-2.2.0.js"></script>
+        <script data-require="ui-bootstrap-tpls@1.2.5" data-semver="1.2.5" src="https://cdn.rawgit.com/angular-ui/bootstrap/gh-pages/ui-bootstrap-tpls-1.2.5.js"></script>
+
+        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/restangular/1.5.1/restangular.min.js"></script>
+        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/restangular/1.5.1/restangular.js"></script>
+
+    </head>
+    <body>
+        {% verbatim %}
+        <div class="container" ng-app="myApp">
+        {% endverbatim %}
+
+            <!--  BASIC INFORMATION -->
+            <h3 class="text-center">Zadanie Rekrutacyjne - Mateusz Nolko</h3>
+            {% if user.is_authenticated %}
+                <h3 class="text-center bg-success">Welcome: {{ user.email }}</h3>
+                <h3 class="text-center">User type: {{ user.user_type }}</h3>
+                <div class="text-center">
+                    <a href="/api" class="btn btn-info">API</a>
+                </div>
+                <br>
+                <div class="text-center">
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning" value="logout">Logout</button>
+                    </form>
+                </div>
+                <br>
+            <!--  FINISH BASIC INFORMATION -->
+
+            <!--  PRODUCER SECTION -->
+                <h3 class="text-center">PRODUCERS:</h3>
+                {% verbatim %}
+                <div ng-controller="producerCtrl">
+                {% endverbatim %}
+
+                <!--  ADD PRODUCER -->
+                {% if user.user_type == "admin" %}
+                    {% verbatim %}
+                        <div class="well clearfix">
+                            <fieldset class="scheduler-border">
+                            <legend class="scheduler-border text-center">Add Producer</legend>
+                            <form class="form-inline text-center">
+                                <div class="form-group">
+                                    <label for="inputName">Name</label>
+                                    <input type="text" class="form-control" id="inputName" ng-model="producerName" placeholder="Name">
+                                </div>
+                                <button type="button" class="btn btn-primary" ng-click="addProducer()"><i class="glyphicon glyphicon-plus"></i>&nbsp;Add Row</button>
+                            </form>
+                            </fieldset>
+                        </div>
+                    {% endverbatim %}
+                {% endif %}
+                <!-- FINISH ADD PRODUCER -->
+
+                <!-- Modal EDIT PRODUCER -->
+                {% if user.user_type == "admin" %}
+                    {% verbatim %}
+                        <div class="well clearfix" ng-show="isEditProducer">
+                            <fieldset class="scheduler-border">
+                            <legend class="scheduler-border text-center">Edit Producer</legend>
+                            <form class="form-inline text-center">
+                                <div class="form-group">
+                                    <label for="inputNameEdit">Name</label>
+                                    <input type="text" class="form-control" id="inputNameEdit" ng-model="producerNameEdit" placeholder="Name">
+                                </div>
+                                <button type="button" class="btn btn-primary" ng-click="saveChangesProducer()"><i class="glyphicon glyphicon-ok"></i> Save</button>
+                                <button type="button" class="btn btn-primary" ng-click="cancelChangesProducer()"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                            </form>
+                            </fieldset>
+                        </div>
+                    {% endverbatim %}
+                {% endif %}
+                <!-- Finish Modal EDIT PRODUCER -->
+
+                <!--  PRODUCER TABLE AND PAGINATION -->
+                {% verbatim %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col"><a href="" ng-click="producersNameSort()">NAME</a></th>
+                                <th scope="col">DELETE</th>
+                                <th scope="col">EDIT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="producer in pagedDataProducers">
+                                <th scope="row">{{ producer.id }}</th>
+                                <td>{{ producer.name }}</td>
+                                <td><a class="btn btn-xs delete-record" ng-click="removeRowProducer(producer)"><i class="glyphicon glyphicon-trash"></i></a></td>
+                                <td><a class="btn btn-xs edit-record" ng-click="editProducer(producer)"><i class="glyphicon glyphicon-pencil"></i></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="text-center">
+                        <uib-pagination total-items="totalItemsProducers" ng-model="currentPageProducers" items-per-page="itemsPerPageProducers"></uib-pagination>
+                    </div>
+                    <br>
+                {% endverbatim %}
+                <!--  FINISH PRODUCER TABLE AND PAGINATION -->
+                <!-- div below closing producer controller-->
+                </div>
+            <!-- FINISH PRODUCER SECTION -->
+
+            <!--  PRODUCT SECTION -->
+                {% verbatim %}
+                    <div ng-controller="productCtrl">
+                {% endverbatim %}
+                    <h3 class="text-center">PRODUCTS:</h3>
+
+                <!--  ADD PRODUCT -->
+                    {% if user.user_type == "admin" %}
+                        {% verbatim %}
+                            <div class="well clearfix">
+                                <fieldset class="scheduler-border">
+                                    <legend class="scheduler-border text-center">Add Product</legend>
+                                    <form class="form-inline">
+                                        <div class="form-group">
+                                            <label for="productInputName">Name</label>
+                                            <input type="text" class="form-control" id="productInputName" ng-model="productName" placeholder="Name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="productInputProducer">Producer</label>
+                                            <select class="form-control" name="producers" ng-model="productProducer" id="productInputProducer" ng-model="productProducer">
+                                                <option value="">--Select producer --</option>
+                                                <option ng-repeat="option in producers" value="{{option.id}}">{{option.name}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="productInputDiscountedPrice">Discounted price</label>
+                                            <input type="number" class="form-control" id="productInputDiscountedPrice" ng-model="productDiscountedPrice" placeholder="Discounted Price">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="productInputPrice">Price</label>
+                                            <input type="number" class="form-control" id="productInputPrice" ng-model="productPrice" placeholder="Price">
+                                        </div>
+                                        <button type="button" class="btn btn-primary center-block" style="margin-top:20px;" ng-click="addProduct()"><i class="glyphicon glyphicon-plus"></i>&nbsp;Add Row</button>
+                                    </form>
+                                </fieldset>
+                            </div>
+                        {% endverbatim %}
+                    {% endif %}
+                <!-- FINISH ADD PRODUCT -->
+
+                <!--  EDIT PRODUCT -->
+                    {% if user.user_type == "admin" %}
+                        {% verbatim %}
+                            <div class="well clearfix" ng-show="isEditProduct">
+                                <fieldset class="scheduler-border">
+                                    <legend class="scheduler-border text-center">Edit Product</legend>
+                                    <form class="form-inline">
+                                        <div class="form-group">
+                                            <label for="productInputNameEdit">Name</label>
+                                            <input type="text" class="form-control" id="productInputNameEdit" ng-model="productNameEdit" placeholder="Name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="productInputProducerEdit">Producer</label>
+                                            <select class="form-control" ng-model="productProducerEdit" id="productInputProducerEdit">
+                                                <option ng-repeat="option in producers" value="{{option.id}}">{{option.name}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="productInputDiscountedPriceEdit">Discounted price</label>
+                                            <input type="number" class="form-control" id="productInputDiscountedPriceEdit" ng-model="productDiscountedPriceEdit" placeholder="Discounted Price">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="productInputPriceEdit">Price</label>
+                                            <input type="number" class="form-control" id="productInputPriceEdit" ng-model="productPriceEdit" placeholder="Price">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="productInputActiveEdit">Active</label>
+                                            <select class="form-control" ng-init="true" ng-model="productActiveEdit" id="productInputActiveEdit">
+                                                <option>true</option>
+                                                <option>false</option>
+                                            </select>
+                                        </div>
+                                        <div class="text-center">
+                                            <button type="button" class="btn btn-primary" style="margin-top:20px;" ng-click="saveChangesProduct()"><i class="glyphicon glyphicon-ok"></i> Save</button>
+                                            <button type="button" class="btn btn-primary" style="margin-top:20px;" ng-click="cancelChangesProduct()"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                                        </div>
+                                    </form>
+                                </fieldset>
+                            </div>
+                        {% endverbatim %}
+                    {% endif %}
+                <!-- FINISH EDIT PRODUCT -->
+
+                <!-- PRODUCT TABLE AND PAGINATION -->
+                    {% verbatim %}
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col"><a href="" ng-click="productNameSort()">NAME</a></th>
+                                    <th scope="col">PRODUCER</th>
+                                    <th scope="col">DISCOUNTED PRICE</th>
+                                    <th scope="col"><a href="" ng-click="productPriceSort()">PRICE</a></th>
+                                    <th scope="col">ACTIVE</th>
+                                    <th scope="col">DELETE</th>
+                                    <th scope="col">EDIT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="product in pagedDataProducts" ng-if="product.is_active == true">
+                                    <th scope="row">{{ product.id }}</th>
+                                    <td>{{ product.name }}</td>
+                                    <td>{{ product.producer }}</td>
+                                    <td>{{ product.discounted_price }}</td>
+                                    <td>{{ product.price }}</td>
+                                    <td>{{ product.is_active }}</td>
+                                    <td><a class="btn btn-xs delete-record" ng-click="removeRowProduct(product)"><i class="glyphicon glyphicon-trash"></i></a></td>
+                                    <td><a class="btn btn-xs edit-record" ng-click="editProduct(product)"><i class="glyphicon glyphicon-pencil"></i></a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="text-center">
+                            <uib-pagination total-items="totalItemsProducts" ng-model="currentPageProducts" items-per-page="itemsPerPageProducts"></uib-pagination>
+                        </div>
+                    {% endverbatim %}
+                <!--  FINISH PRODUCT TABLE AND PAGINATION -->
+
+                <!-- PRODUCT FILTERS -->
+                    {% verbatim %}
+                        <legend class="scheduler-border text-center" style="margin-top: 10px;">Search Product</legend>
+                        <form class="">
+                            <div class="form-group">
+                                <label for="productInputNameFiler">Name</label>
+                                <input type="text" class="form-control" id="productInputNameFiler" ng-model="productNameFilter" placeholder="Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="productInputProducerFilter">Producer</label>
+                                <select class="form-control" name="producers" id="productInputProducerFilter" ng-model="productProducerFilter">
+                                    <option value="">-- Select producer --</option>
+                                    <option ng-repeat="option in producers" value="{{option.id}}">{{option.name}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="productInputDiscountedPriceFilter">Discounted</label>
+                                <select class="form-control" ng-model="productDiscountedPriceFilter" id="productInputDiscountedPriceFilter">
+                                    <option value="">--Select--</option>
+                                    <option>true</option>
+                                    <option>false</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="productInputPriceFromFilter">Price from</label>
+                                <input type="number" class="form-control" id="productInputPriceFromFilter" ng-model="productPriceFromFilter" placeholder="Price from">
+                            </div>
+                            <div class="form-group">
+                                <label for="productInputPriceToFilter">Price to</label>
+                                <input type="number" class="form-control" id="productInputPriceToFilter" ng-model="productPriceToFilter" placeholder="Price to">
+                            </div>
+                            <div class="text-center">
+                                <button type="button" class="btn btn-primary" style="margin-bottom:20px;" ng-click="searchProduct()"><i class="glyphicon glyphicon-search"></i> Search</button>
+                                <button type="button" class="btn btn-primary" style="margin-bottom:20px;" ng-click="resetProduct()"><i class="glyphicon glyphicon-refresh"></i> Reset</button>
+                            </div>
+                        </form>
+                    {% endverbatim %}
+                <!-- FINISH PRODUCT FILTERS -->
+
+            <!--  FINISH PRODUCT SECTION -->
+
+                <!-- div below closing product controller -->
+                </div>
+
+            <!-- endif below closing user auth -->
+            {% endif %}
+
+            {% if not user.is_authenticated %}
+                <h3 class="text-center bg-danger">You don't have access to content on this page.</h3>
+            {% endif %}
+
+        <!-- div below closing container and ng-app -->
+        </div>
+
+        <!-- Modal API response -->
+        <div id="myModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title text-center">Response</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p id="responseFromApi"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <!-- Finish API response  -->
+
+        <script src="{% static 'js/app.js' %}"></script>
+        <script src="{% static 'js/producerController.js' %}"></script>
+        <script src="{% static 'js/productController.js' %}"></script>
+    </body>
+</html>
